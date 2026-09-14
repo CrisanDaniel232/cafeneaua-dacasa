@@ -28,7 +28,9 @@ main{padding:0 18px 110px}.title{display:flex;justify-content:space-between;alig
 <div id="overlay" class="overlay" onclick="if(event.target===this)closeCart()"><aside class="drawer" id="drawer"><div class="head"><h2>Coșul tău</h2><button class="close" onclick="closeCart()">×</button></div><div id="items"></div><div class="total"><span>Total</span><span id="total">0 LEI</span></div>
 <button id="online" class="pay selected" onclick="payment='online';selectPay()">💳 <strong>Plată online</strong>Card bancar · rapid · securizat</button>
 <button id="cash" class="pay" onclick="payment='cash';selectPay()">💵 <strong>Cash la bar</strong>Plătești la bar după comandă</button>
-<button class="send" onclick="sendOrder()">Trimite comanda</button></aside></div>
+<button class="send" onclick="sendOrder()">Trimite comanda</button>
+<p style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px">Nu ai WhatsApp? <a href="tel:+40771531224" style="color:var(--gold)">Sună la bar</a></p>
+</aside></div>
 <script>
 const P=[
 ['Coffee','☕','Espresso','50ml',9],['Coffee','☕','Americano','150ml',9],['Coffee','☕','Espresso Dublu','75ml',13],['Coffee','☕','Espresso Macchiato','75ml',10],['Coffee','☕','Cappuccino','200ml',11],['Coffee','☕','Flat White','150ml',15],['Coffee','☕','Latte','250ml',16],['Coffee','🧊','Espresso Tonic','200ml',16],['Coffee','🧊','Iced Coffee','250ml',16],['Coffee','🥛','Frappe','250ml',16],['Coffee','🥛','Cold Brew Latte','250ml',16],['Coffee','☕','Dubai Latte','250ml',25],
@@ -51,6 +53,19 @@ function update(){badge.textContent=count();barTotal.textContent=money(sum());ba
 function openCart(){renderCart();overlay.style.display='block'}function closeCart(){overlay.style.display='none'}
 function renderCart(){items.innerHTML=Object.entries(cart).map(([i,q])=>'<div class="item"><div class="grow"><b>'+P[i][2]+'</b><div class="price">'+money(P[i][4]*q)+'</div></div><div class="qty"><button onclick="change('+i+',-1)">−</button> '+q+' <button onclick="change('+i+',1)">+</button></div></div>').join('')||'<p style="color:var(--muted)">Coșul este gol.</p>';total.textContent=money(sum())}
 function selectPay(){online.classList.toggle('selected',payment=='online');cash.classList.toggle('selected',payment=='cash')}
-function sendOrder(){if(!count())return alert('Adaugă cel puțin un produs.');confirmText.textContent='Masa '+table+' · '+count()+' produse · '+money(sum())+' · '+(payment=='online'?'Plată online':'Plată cash la bar');overlay.style.display='none';menu.style.display='none';catsEl.style.display='none';document.querySelector('.hero').style.display='none';bar.classList.remove('show');confirm.style.display='block';cart={}}
+const WHATSAPP_NUMBER='40771531224';
+function buildOrderMessage(){
+  let lines=Object.entries(cart).map(([i,q])=>'• '+P[i][2]+' x'+q+' — '+money(P[i][4]*q));
+  let payLabel=payment=='online'?'Plată online':'Cash la bar';
+  return 'Comandă nouă — Masa '+table+'\n\n'+lines.join('\n')+'\n\nTotal: '+money(sum())+'\nPlată: '+payLabel;
+}
+function sendOrder(){
+  if(!count())return alert('Adaugă cel puțin un produs.');
+  const msg=buildOrderMessage();
+  const waUrl='https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg);
+  confirmText.textContent='Masa '+table+' · '+count()+' produse · '+money(sum())+' · '+(payment=='online'?'Plată online':'Plată cash la bar');
+  overlay.style.display='none';menu.style.display='none';catsEl.style.display='none';document.querySelector('.hero').style.display='none';bar.classList.remove('show');confirm.style.display='block';cart={};
+  window.open(waUrl,'_blank');
+}
 const catsEl=document.getElementById('cats');renderCats();render();update();
 </script></body></html>
